@@ -4,8 +4,9 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-TOKEN = "8464474423:AAFCBOKq-LS5PQUsE8WA-q4qc3u_nFf7eCc"
-BOT_USERNAME: Final = "top-bot"
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
+
 
 # Commands
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -25,19 +26,20 @@ def handle_response(text: str) -> str:
         return "Hello there, welcome."
     if "hi" in processed:
         return "Hi, welcome"
+    
     if "how are you" in processed or "i'm good" in processed or "im good" in processed or "am good" in processed:
-        return "Glad to hear that. How can I assist you today?"
+        return "Glad to hear that. So this is how we work: We support Instagram accounts to grow their following. We pay 5 euros per account after tasks are done."
 
     if "just got here" in processed or "i just got here" in processed:
         return "Welcome, feel free to ask me anything you want to know."
 
     if "explain" in processed or "explain to me" in processed:
-        return "We support Instagram accounts to grow their following. We pay 5 euros per account after tasks are done."
+        return "We support Instagram accounts to grow their following. We pay 5 euros per account after tasks are done. Do you have an Instagram account?"
 
     if "how much" in processed or "amount" in processed or "payment" in processed:
-        return "We pay 5 euros per account that you help us with."
+        return "We pay 5 euros per account that you provide"
 
-    if "register" in processed or "sign up" in processed:
+    if "register" in processed or "sign up" in processed or "sign me up" in processed or "i want to register" in processed or "i want to sign up" in processed:
         return "Yes, if you don't have an Instagram account, you need to download it from the Play Store (Android) or App Store (iOS) and register."
 
     if "bye" in processed or "goodbye" in processed:
@@ -47,7 +49,7 @@ def handle_response(text: str) -> str:
         return "BLOCK_USER"
 
     if "stupid" in processed or "dumb" in processed or "idiot" in processed:
-        return "I'm doing my best to assist you. Let's keep our conversation respectful."
+        return "Please let's keep our conversation respectful."
 
     if "?" in processed:
         return "let me get back to you in a minute."
