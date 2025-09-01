@@ -1,37 +1,63 @@
 import os
+import requests
+import json
 import telebot
 from dotenv import load_dotenv
-from gemini import get_gemini_response
 
 load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
+BOT_USERNAME = os.getenv("BOT_USERNAME")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
-@bot.message_handler(func=lambda message: True)
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
+@bot.message_handler(func=lambda m: True)
 def handle_message(message):
-    user_text = message.text
-    chat_id = message.chat.id
+    user_input = message.text
 
-    if not user_text.strip():
-        return
+    headers = {
+        "Content-Type": "application/json",
+        "X-goog-api-key": GEMINI_API_KEY
+    }
 
-    lower_text = user_text.lower()
-    spam_keywords = ["scam", "scammer", "lying", "liar"]
-    if any(word in lower_text for word in spam_keywords):
-        try:
-            bot.delete_message(chat_id, message.message_id)
-        except Exception as e:
-            print(f"Failed to delete spam message: {e}")
-        return 
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": user_input}
+                ]
+            }
+        ]
+    }
 
     try:
-        gemini_reply = get_gemini_response(user_text)
+        response = requests.post(GEMINI_URL, headers=headers, data=json.dumps(data))
+
+        print("Status Code:", response.status_code)  # ✅ print status
+        print("Raw Response:", response.text)        # ✅ print raw response
+        print("Gemini API Key:", GEMINI_API_KEY)
+
+        response.raise_for_status()  # will raise error if status != 200
+
+        response_json = response.json()
+        print("Gemini Response JSON:", json.dumps(response_json, indent=2))
+
+        candidates = response_json.get("candidates", [])
+        if candidates:
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if parts:
+                reply_text = parts[0].get("text", "⚠️ Gemini gave no text.")
+            else:
+                reply_text = "⚠️ Gemini returned no parts."
+        else:
+            reply_text = "⚠️ Gemini returned no candidates."
+
     except Exception as e:
-        gemini_reply = f"Error getting response: {str(e)}"
+        reply_text = f"❌ Error: {e}"
 
-    bot.send_message(chat_id, gemini_reply)
+    bot.reply_to(message, reply_text)
 
-print("Bot is polling...")
 bot.infinity_polling()
