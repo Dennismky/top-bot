@@ -36,11 +36,11 @@ def handle_message(message):
     try:
         response = requests.post(GEMINI_URL, headers=headers, data=json.dumps(data))
 
-        print("Status Code:", response.status_code)  # ✅ print status
-        print("Raw Response:", response.text)        # ✅ print raw response
+        print("Status Code:", response.status_code) 
+        print("Raw Response:", response.text)      
         print("Gemini API Key:", GEMINI_API_KEY)
 
-        response.raise_for_status()  # will raise error if status != 200
+        response.raise_for_status()  
 
         response_json = response.json()
         print("Gemini Response JSON:", json.dumps(response_json, indent=2))
@@ -49,14 +49,14 @@ def handle_message(message):
         if candidates:
             parts = candidates[0].get("content", {}).get("parts", [])
             if parts:
-                reply_text = parts[0].get("text", "⚠️ Gemini gave no text.")
+                reply_text = parts[0].get("text", " Gemini gave no text.")
             else:
-                reply_text = "⚠️ Gemini returned no parts."
+                reply_text = "Gemini returned no parts."
         else:
-            reply_text = "⚠️ Gemini returned no candidates."
+            reply_text = " Gemini returned no candidates."
 
     except Exception as e:
-        reply_text = f"❌ Error: {e}"
+        reply_text = f"Error: {e}"
 
     bot.reply_to(message, reply_text)
 
